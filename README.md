@@ -46,4 +46,20 @@ It leverages [Sonic Annotator](https://www.vamp-plugins.org/sonic-annotator/) an
 
 The script requires your project to be saved on disk before it can run (it needs a valid project folder for temp files).
 
+### Usage
 
+    Select any audio item (guitar, piano, mix, etc).
+
+    Run the script (from Actions list, toolbar, or via hotkey).
+
+    The script will process the audio and add a “Chords (Extracted)” track with text items indicating detected chords, each at the correct position.
+
+### Troubleshooting
+
+    If you see errors about "Sonic Annotator not launched", check the path and ensure Sonic Annotator is installed.
+
+    If you see "CSV file was not created", verify that Chordino is properly installed and visible to Sonic Annotator.
+
+    For best results, use relatively isolated guitar or keyboard parts; dense mixes or noisy sources may reduce accuracy.
+
+    The script does not alter your original audio.
