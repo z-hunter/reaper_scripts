@@ -17,7 +17,7 @@
 ----------------------------------------
 -- USER CONFIG -------------------------
 ----------------------------------------
-local SONIC_ANNOTATOR_EXE = [[D:\Sound.dir\sonic-annotator\sonic-annotator.exe]]  -- <---- Set your path here! 
+local SONIC_ANNOTATOR_EXE = [["C:\Program files\sonic-annotator\sonic-annotator.exe"]]  -- <---- Set your path here! 
 local PLUGIN_ID           = "vamp:nnls-chroma:chordino:simplechord"
 local TIMEOUT_MS          = 120000
 
