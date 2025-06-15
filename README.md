@@ -1,12 +1,12 @@
 # My scripts for Cockos REAPER DAW
 
-## Extract Chords from Selected Audio Item (Chordino) — ReaScript
+## Extract Chords from Selected Audio Item (Chordino)
 
 *ExtractChordsFromAudio.lua*
 
 ### What is this?
 
-This ReaScript for REAPER automatically extracts chords from a selected audio item (e.g., guitar, keyboard, or even full mix) and creates a dedicated track with chord names as text items.  
+This ReaScript automatically extracts chords from a selected audio item (e.g., guitar, keyboard, or even full mix) and creates a dedicated track with chord names as text items.  
 It leverages [Sonic Annotator](https://www.vamp-plugins.org/sonic-annotator/) and the [Chordino VAMP plugin](https://www.vamp-plugins.org/plugin-doc/qm-vamp-plugins.html#id6).
 
 ---
