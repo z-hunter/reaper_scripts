@@ -1,6 +1,6 @@
 # My scripts for Cockos Reaper DAW
 
-##Extract Chords from Selected Audio Item (Chordino) — REAPER ReaScript
+## Extract Chords from Selected Audio Item (Chordino) — REAPER ReaScript
 
 *ExtractChordsFromAudio.lua*
 
