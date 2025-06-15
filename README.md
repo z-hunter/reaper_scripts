@@ -40,9 +40,9 @@ It leverages [Sonic Annotator](https://www.vamp-plugins.org/sonic-annotator/) an
 - **Edit this line at the top:**
   ```lua
   local SONIC_ANNOTATOR_EXE = [[D:\Sound.dir\sonic-annotator\sonic-annotator.exe]]
--
 
-4. Save Your REAPER Project
+
+### 4. Save Your REAPER Project
 
 The script requires your project to be saved on disk before it can run (it needs a valid project folder for temp files).
 
