@@ -1,6 +1,6 @@
-# My scripts for Cockos Reaper DAW
+# My scripts for Cockos REAPER DAW
 
-## Extract Chords from Selected Audio Item (Chordino) — REAPER ReaScript
+## Extract Chords from Selected Audio Item (Chordino) — ReaScript
 
 *ExtractChordsFromAudio.lua*
 
@@ -30,8 +30,8 @@ It leverages [Sonic Annotator](https://www.vamp-plugins.org/sonic-annotator/) an
 
 ### 2. Install Chordino VAMP Plugin
 
-- Download from [the official site](https://github.com/tonalities/Chordino) or [here](https://code.soundsoftware.ac.uk/attachments/download/2863/Vamp%20Plugin%20Pack%20Installer%202.0.exe).
-- Place `qm-vamp-plugins.dll` into your `C:\Program Files\Vamp Plugins` directory  
+- Download from [the official site](https://github.com/tonalities/Chordino) or [VAMP Plugins Pack](https://code.soundsoftware.ac.uk/attachments/download/2863/Vamp%20Plugin%20Pack%20Installer%202.0.exe).
+- Install all files (including `qm-vamp-plugins.dll`) into your `C:\Program Files\Vamp Plugins` directory  
   *(or any other VAMP plugin directory on your system).*
 
 ### 3. Configure the Script
@@ -40,5 +40,7 @@ It leverages [Sonic Annotator](https://www.vamp-plugins.org/sonic-annotator/) an
 - **Edit this line at the top:**
   ```lua
   local SONIC_ANNOTATOR_EXE = [[D:\Sound.dir\sonic-annotator\sonic-annotator.exe]]
+
+  to folder where  Sonic Annotator was installed.
 
 
