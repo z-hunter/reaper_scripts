@@ -1,7 +1,7 @@
 --[[
   * ReaScript Name: Extract Chords from Selected Audio Item (Chordino)
   * Author: Michael Voitovich (zx.hunter@gmail.com)
-  * Version: 1.0
+  * Version: 1.0.1
   * Licence: MIT
   * REAPER: 6.0+
   * Extensions: None
@@ -13,23 +13,22 @@
       Project must be saved before running.
 --]]
 
-
 ----------------------------------------
 -- USER CONFIG -------------------------
 ----------------------------------------
-local SONIC_ANNOTATOR_EXE = [["C:\Program files\sonic-annotator\sonic-annotator.exe"]]  -- <---- Set your path here! 
+
+local SONIC_ANNOTATOR_EXE = [[C:\Program Files\sonic-annotator-win64\sonic-annotator.exe]] -- <-- Set your path here!
 local PLUGIN_ID           = "vamp:nnls-chroma:chordino:simplechord"
-local TIMEOUT_MS          = 120000
 
 ----------------------------------------
 -- HELPERS ----------------------------
 ----------------------------------------
 local function show(msg)
-  reaper.ShowMessageBox(msg, "Chord Extractor", 0)
+  -- reaper.ShowMessageBox(msg, "Chord Extractor", 0)
 end
 
 local function printf(fmt, ...)
-  reaper.ShowConsoleMsg(string.format(fmt, ...))
+ -- reaper.ShowConsoleMsg(string.format(fmt, ...))
 end
 
 local function prepareTemp(dirName)
@@ -95,10 +94,13 @@ reaper.Main_OnCommand(40362,0)              -- glue to single wav
 
 local gluedItem = reaper.GetSelectedMediaItem(0, 0)
 local gluedTake = gluedItem and reaper.GetActiveTake(gluedItem) or nil
-if not (gluedItem and gluedTake) then show("ERROR: Could not get glued item/take") return end
+if not (gluedItem and gluedTake) then show("Could not get glued item/take") return end
 
 local wavPathReal = reaper.GetMediaSourceFileName(reaper.GetMediaItemTake_Source(gluedTake), "")
-if not wavPathReal or wavPathReal == "" then show("ERROR: REAPER did not return glued file path") return end
+if not wavPathReal or wavPathReal == "" then
+  show("REAPER did not return glued file path.\n\nPossible reasons:\n- Current project was not saved to disk yet.")
+  return
+end
 printf("[OK] Path to glued file: %s\n", wavPathReal)
 
 -- COPY TO TEMP
@@ -106,7 +108,7 @@ local tmpBase = prepareTemp("ChordExtractTemp")
 local wavTmp = tmpBase..".wav"
 local srcF = io.open(wavPathReal, "rb")
 local dstF = io.open(wavTmp,  "wb")
-if not (srcF and dstF) then show("ERROR: Could not create temp WAV") return end
+if not (srcF and dstF) then show("Could not create temp WAV") return end
 
 dstF:write(srcF:read("*a")); srcF:close(); dstF:close()
 printf("[OK] Temp WAV: %s\n", wavTmp)
@@ -140,14 +142,14 @@ end
 
 -- 1. Проверка: анализатор не запустился
 if not output or output == 0 or output == "0" then
-  show("ERROR: Sonic Annotator was not launched. Check path and permissions.")
+  show("ERROR: Sonic Annotator not found.\n\nCheck path in the USER CONFIG section of this script.")
   cleanup() return
 end
 
 -- 2. Проверка: CSV не создан
 local csvFile = io.open(csvTmp, "r")
 if not csvFile then
-  show("ERROR: Chordino analysis failed — CSV file was not created.\n\nPossible reasons:\n- Sonic Annotator not installed or misconfigured\n- VAMP plugin not found\n- File path issue")
+  show("ERROR: Chordino analysis failed — CSV file was not created.\n\nPossible reasons:\n- Sonic Annotator misconfigured\n- VAMP plugin not found\n- File path issue")
   cleanup() return
 end
 csvFile:close()
@@ -155,7 +157,7 @@ csvFile:close()
 -- 3. Проверка: CSV создан, но пуст или нет аккордов
 local chords = parseChordinoCSV(csvTmp)
 if #chords == 0 then
-  show("Chordino found no chords in this audio (CSV was empty).")
+  show("Chordino found no chords in this audio (CSV was empty). Try with different material or settings.")
   cleanup() return
 end
 
@@ -168,7 +170,7 @@ for i = 0, reaper.CountTracks(0) - 1 do
   local tr = reaper.GetTrack(0, i)
   local _, name = reaper.GetTrackName(tr, "")
   if name == chordTrackName then chordTrack = tr break end
-end
+end 
 if not chordTrack then
   local idx = reaper.CountTracks(0)
   reaper.InsertTrackAtIndex(idx, true)
@@ -191,3 +193,4 @@ for _,c in ipairs(chords) do
 end
 
 cleanup()
+  
