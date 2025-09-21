@@ -1,4 +1,4 @@
-# My scripts for Cockos REAPER DAW
+# My scripts and effects plugins for Cockos REAPER DAW
 
 ## Extract Chords from Selected Audio Item (Chordino)
 
@@ -57,9 +57,14 @@ The script requires your project to be saved on disk before it can run (it needs
 ### Troubleshooting
 
     If you see errors about "Sonic Annotator not launched", check the path and ensure Sonic Annotator is installed.
-
     If you see "CSV file was not created", verify that Chordino is properly installed and visible to Sonic Annotator.
-
     For best results, use relatively isolated guitar or keyboard parts; dense mixes or noisy sources may reduce accuracy.
-
+    
     The script does not alter your original audio.
+
+## Compensator
+
+A universal JSFX gain compensator for Reaper. One plugin (sender) is placed before the VST chain and measures the input volume. The second (receiver) is placed at the output and attempts to return the volume to the level of the first.
+The sender and receiver can be on different tracks, so the volume of one instrument can be adjusted based on the volume of the other.
+
+
