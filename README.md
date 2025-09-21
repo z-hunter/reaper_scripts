@@ -67,4 +67,9 @@ The script requires your project to be saved on disk before it can run (it needs
 A universal JSFX gain compensator for Reaper. One plugin (sender) is placed before the VST chain and measures the input volume. The second (receiver) is placed at the output and attempts to return the volume to the level of the first.
 The sender and receiver can be on different tracks, so the volume of one instrument can be adjusted based on the volume of the other.
 
+## Installation & Setup
+Put following files
+- Compensator - Sender.jsfx
+- Compensator - Receiver.jsfx
 
+  into your reaper/effects folder. 
