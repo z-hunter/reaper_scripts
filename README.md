@@ -72,4 +72,4 @@ Put following files
 - Compensator - Sender.jsfx
 - Compensator - Receiver.jsfx
 
-  into your reaper/effects folder. 
+  into your reaper\effects folder. 
