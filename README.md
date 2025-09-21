@@ -66,6 +66,7 @@ The script requires your project to be saved on disk before it can run (it needs
 
 A universal JSFX gain compensator for Reaper. One plugin (sender) is placed before the VST chain and measures the input volume. The second (receiver) is placed at the output and attempts to return the volume to the level of the first.
 The sender and receiver can be on different tracks, so the volume of one instrument can be adjusted based on the volume of the other.
+There's a 'normal' mode, which has an attack/release, and a 'direct' mode, which works with individual samples and instantly sets the same volume. Plugins that alter dynamics (like compressors/limiters) require the normal mode, as the direct mode will undo all the work of the compressor/limiter, restoring the original microdynamics.
 
 ## Installation & Setup
 Put following files
