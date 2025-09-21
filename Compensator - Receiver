@@ -1,0 +1,287 @@
+desc: Compensator - Receiver (auto match to Sender) [v1.0]
+author:Michael Voitovich
+version:1.0
+chans:2
+options:gmem=LevelLink
+
+slider1:0<0,63,1>Link ID (match Sender)
+slider2:10<5,1000,1>Detector window (ms)
+slider3:8<1,500,1>Attack time (ms)
+slider4:120<10,1000,1>Release time (ms)
+slider5:6<0,24,0.5>Max step per block (dB)
+slider6:12<0,24,0.5>Max boost (dB)
+slider7:24<0,48,0.5>Max cut (dB)
+slider8:1<0,1,1{Off,On}>Freeze when Sender silent
+slider9:0<0,1,1{Off,On}>Soft limit output
+slider10:0<0,1,1{Off,On}>Direct smpl2smpl mode
+slider11:3<0,20,0.1>Anti-zipper ramp (ms)
+slider12:0.01<0,0.2,0.01>Applied gain rounding (dB)
+slider13:0<-24,24,0.1>Output gain (dB)
+
+@init
+EPS    = 0.00000000000000000001;
+DEN_PK = 0.000000000000000001;
+DEN_MS = 0.000000000000000000000001;
+
+// --- HINTS (mini-tooltips in English) ---
+hint_ms = 2000;      // how long to show a hint, ms
+hint_t  = 0;         // remaining time, seconds
+#hint = "";          // hint text
+
+function set_hint(idx) (
+  // idx is 0-based: slider1 -> 0, ..., slider13 -> 12
+  idx == 0 ? ( #hint = "Link ID: must match Sender’s ID."; )
+: idx == 1 ? ( #hint = "Window: longer = smoother & slower metering (RMS) / longer peak release."; )
+: idx == 2 ? ( #hint = "Attack: speed to INCREASE Applied gain toward the target."; )
+: idx == 3 ? ( #hint = "Release: speed to DECREASE Applied gain toward the target."; )
+: idx == 4 ? ( #hint = "Max step per block: hard cap on change (dB) per audio block."; )
+: idx == 5 ? ( #hint = "Max boost: maximum positive correction allowed (+dB)."; )
+: idx == 6 ? ( #hint = "Max cut: maximum negative correction allowed (−dB)."; )
+: idx == 7 ? ( #hint = freeze_on_sender ? "ON — hold Applied gain while Sender reports silence." : "OFF — keep adapting even during silence."; )
+: idx == 8 ? ( #hint = limit_on ? "Soft limit output: ON — gentle output safety; may color peaks." : "Soft limit output: OFF — transparent output."; )
+: idx == 9 ? ( #hint = direct_mode ? "ON — immediate correction (each sample)." : "OFF — dynamic correction (Attack/Release)."; )
+: idx == 10 ? ( #hint = "Anti-zipper ramp: sample-by-sample smoothing to avoid crackle/clicks."; )
+: idx == 11 ? ( sprintf(#hint, "Applied gain rounding: quantize to %.2f dB for stability.", slider12); )
+: idx == 12 ? ( sprintf(#hint, "Output gain: post gain at the plugin output = %.2f dB.", slider13); )
+: ( #hint = "" );
+  hint_t = hint_ms/1000; // (re)start timer
+);
+
+// prev slider values for reliable hint detection
+ps1=slider1; ps2=slider2; ps3=slider3; ps4=slider4; ps5=slider5;
+ps6=slider6; ps7=slider7; ps8=slider8; ps9=slider9; ps10=slider10;
+ps11=slider11; ps12=slider12; ps13=slider13;
+
+
+LN10 = log(10);
+function db_from_amp(a) ( a <= EPS ? -200 : (20/LN10)*log(a); );
+function amp_from_db(db) ( exp(db*LN10/20); );
+function clamp(v, lo, hi) ( v < lo ? lo : v > hi ? hi : v; );
+function softsat(x) ( x / (1 + abs(x)); );
+function round_db(v, step) ( step <= 0 ? v : floor(v/step + 0.5)*step; );
+
+function update_base() ( gmem_base = Link_ID*16; );
+function update_detector_coeffs() (
+  t_det = max(0.001, slider2/1000);
+  a_rms = exp(-1/(t_det*srate));
+);
+function update_ar_coeffs_block() (
+  blkN = samplesblock;
+  a_att_blk = exp(-blkN/(max(0.001, slider3/1000)*srate));
+  a_rel_blk = exp(-blkN/(max(0.001, slider4/1000)*srate));
+);
+function update_ramp_coeff() (
+  ramp_s = max(0, slider11/1000);
+  k_ramp = (ramp_s <= 0) ? 1 : (1 - exp(-1/(ramp_s*srate)));
+);
+
+Link_ID = slider1; update_base();
+update_detector_coeffs(); update_ar_coeffs_block(); update_ramp_coeff();
+
+max_step = slider5; max_boost = slider6; max_cut = slider7;
+freeze_on_sender = (slider8>=0.5);
+limit_on = (slider9>=0.5);
+direct_mode = (slider10>=0.5);
+round_step = slider12;
+
+delta_db_s = 0; ms = 0; peak_env = 0; last_input_db = -200;
+det_mode = 0; // 0=RMS,1=Peak (auto)
+gain_tgt = 1.0; gain_cur = 1.0;
+
+out_tgt = amp_from_db(slider13);
+out_cur = out_tgt;
+
+@slider
+Link_ID = slider1; update_base();
+update_detector_coeffs(); update_ar_coeffs_block(); update_ramp_coeff();
+max_step = slider5; max_boost = slider6; max_cut = slider7;
+freeze_on_sender = (slider8>=0.5);
+limit_on = (slider9>=0.5);
+direct_mode = (slider10>=0.5);
+round_step = slider12;
+out_tgt = amp_from_db(slider13);
+// Robust detection of which slider actually changed (0-based index)
+chg = -1;
+(slider1  != ps1)  ? (ps1  = slider1;  chg = 0;);
+(slider2  != ps2)  ? (ps2  = slider2;  chg = 1;);
+(slider3  != ps3)  ? (ps3  = slider3;  chg = 2;);
+(slider4  != ps4)  ? (ps4  = slider4;  chg = 3;);
+(slider5  != ps5)  ? (ps5  = slider5;  chg = 4;);
+(slider6  != ps6)  ? (ps6  = slider6;  chg = 5;);
+(slider7  != ps7)  ? (ps7  = slider7;  chg = 6;);
+(slider8  != ps8)  ? (ps8  = slider8;  chg = 7;);
+(slider9  != ps9)  ? (ps9  = slider9;  chg = 8;);
+(slider10 != ps10) ? (ps10 = slider10; chg = 9;);
+(slider11 != ps11) ? (ps11 = slider11; chg =10;);
+(slider12 != ps12) ? (ps12 = slider12; chg =11;);
+(slider13 != ps13) ? (ps13 = slider13; chg =12;);
+
+(chg >= 0) ? ( set_hint(chg); );
+
+
+
+@block
+target_db   = gmem[gmem_base+0];
+src_sil     = gmem[gmem_base+1];
+sender_mode = gmem[gmem_base+2];
+det_mode = (sender_mode >= 0.5) ? 1 : 0;
+
+update_ar_coeffs_block();
+
+des = target_db - last_input_db;
+des = clamp(des, -max_cut, max_boost);
+
+(freeze_on_sender && src_sil>=1) ? (
+  delta_db_s += 0;
+) :
+(
+  direct_mode ? (
+    delta_db_s = des;
+  ) : (
+    need_up = (des > delta_db_s);
+    a_blk = need_up ? a_att_blk : a_rel_blk;
+    next_db = a_blk*delta_db_s + (1 - a_blk)*des;
+    step = next_db - delta_db_s;
+    step = clamp(step, -max_step, max_step);
+    delta_db_s += step;
+  );
+);
+
+delta_db_s = round_db(delta_db_s, round_step);
+
+gain_tgt = amp_from_db(delta_db_s);
+
+// Декремент таймера подсказки в секундах
+(hint_t > 0) ? (
+  hint_t -= samplesblock / srate;
+  (hint_t < 0) ? hint_t = 0;
+);
+
+
+
+@sample
+inL = spl0; inR = spl1;
+
+det_mode == 1 ? (
+  pk = max(abs(inL), abs(inR));
+  peak_env = max(pk, a_rms*peak_env);
+  (peak_env < DEN_PK) ? (peak_env = 0;);
+  cur_amp = peak_env;
+) : (
+  ms = a_rms*ms + (1-a_rms)*0.5*(inL*inL + inR*inR);
+  (ms < DEN_MS) ? (ms = 0;);
+  cur_amp = sqrt(max(0, ms));
+);
+
+cur_db = db_from_amp(cur_amp);
+last_input_db = cur_db;
+
+gain_cur += (gain_tgt - gain_cur) * k_ramp;
+out_cur  += (out_tgt - out_cur) * k_ramp;
+
+final_gain = gain_cur * out_cur;
+
+limit_on ? (
+  spl0 = softsat(inL * final_gain);
+  spl1 = softsat(inR * final_gain);
+) : (
+  spl0 = inL * final_gain;
+  spl1 = inR * final_gain;
+);
+
+// ==================== GFX UI ====================
+@gfx 560 196
+// фон
+gfx_a=1; gfx_r=0.95; gfx_g=0.95; gfx_b=0.95; gfx_rect(0,0,gfx_w,gfx_h);
+
+// строки статуса
+det_mode ? ( #mode="Peak"; ) : ( #mode="RMS"; );
+freeze_on_sender ? ( #freeze="On"; ) : ( #freeze="Off"; );
+direct_mode ? ( #direct="On"; ) : ( #direct="Off"; );
+
+gfx_r=gfx_g=gfx_b=0;
+gfx_x=10; gfx_y=10;
+sprintf(#buf,"Link ID: %.0f    Mode: %s   Sender silence: ",
+        Link_ID, #mode);
+gfx_drawstr(#buf);
+
+
+// ----- Вторая строка: контекстная подсказка при движении слайдера -----
+base_after = 28; // Y следующей строки
+
+(hint_t > 0) ? (
+  // фон подсказки (мягко-жёлтый)
+  gfx_r=1.00; gfx_g=0.98; gfx_b=0.80; gfx_rect(10, base_after-2, gfx_w-20, 20, 1);
+  // текст подсказки
+  gfx_r=0.25; gfx_g=0.20; gfx_b=0.00; gfx_x=14; gfx_y=base_after+2;
+  gfx_drawstr(#hint);
+  next_y = base_after + 24; // ниже баннера подсказки
+) : (
+  next_y = base_after; // линия свободна — ничего не рисуем
+);
+
+
+// отдельная строка Sender silence
+gfx_x=351; gfx_y=10;
+src_sil>=1 ? (
+  gfx_r=0.80; gfx_g=0.20; gfx_b=0.20; // красный текст
+  gfx_drawstr("YES");
+) : (
+  gfx_r=0.15; gfx_g=0.55; gfx_b=0.15; // зелёный текст
+  gfx_drawstr("NO");
+);
+
+// ----- Предупреждение при Direct ON -----
+direct_mode ? (
+  gfx_r=1.00; gfx_g=0.92; gfx_b=0.70; gfx_rect(10, next_y+2, gfx_w-20, 26, 1);
+  gfx_r=0.55; gfx_g=0.25; gfx_b=0.00; gfx_x=14; gfx_y=next_y+8;
+  gfx_drawstr("Direct smpl2smpl ON: Attack, Release, Max step are ignored. Freeze still active.");
+  bars_top = next_y + 36;
+) : (
+  bars_top = next_y + 4;
+);
+
+
+// бары
+function draw_bar(x,y,w,h,val_db,min_db,max_db) (
+  rng = max_db - min_db;
+  n = (val_db - min_db) / (rng > 0 ? rng : 1);
+  n < 0 ? n = 0 : n > 1 ? n = 1;
+  gfx_r=0.85; gfx_g=0.85; gfx_b=0.85; gfx_rect(x,y,w,h,1);
+  gfx_r=0.20; gfx_g=0.60; gfx_b=0.90; gfx_rect(x,y,w*n,h,1);
+  gfx_r=0.25; gfx_g=0.25; gfx_b=0.25; gfx_rect(x,y,w,h,0);
+);
+
+// вертикальная метка на 0 dB
+function draw_zero_marker(x,y,w,h,min_db,max_db) (
+  rng = max_db - min_db;
+  n0 = (0 - min_db) / (rng > 0 ? rng : 1);
+  n0 < 0 ? n0 = 0 : n0 > 1 ? n0 = 1;
+  x0 = x + w*n0;
+  // тёмно-серая, чуть «толще» (две линии рядом)
+  gfx_r=0.15; gfx_g=0.15; gfx_b=0.15;
+  gfx_line(x0,   y, x0,   y+h);
+  gfx_line(x0+1, y, x0+1, y+h);
+);
+
+
+
+bar_x = 10; bar_w = gfx_w - 20; bar_h = 18;
+
+// Target
+draw_bar(bar_x, bars_top, bar_w, bar_h, target_db, -80, 0);
+gfx_r=gfx_g=gfx_b=0; gfx_x=bar_x; gfx_y=bars_top+bar_h+4;
+sprintf(#t, "Target:  %.2f dB", target_db); gfx_drawstr(#t);
+
+// Input
+draw_bar(bar_x, bars_top+32, bar_w, bar_h, last_input_db, -80, 0);
+gfx_x=bar_x; gfx_y=bars_top+32+bar_h+4;
+sprintf(#t, "Input:   %.2f dB", last_input_db); gfx_drawstr(#t);
+
+// Applied (+ нулевая риска по центру, если уже добавлял)
+draw_bar(bar_x, bars_top+64, bar_w, bar_h, (20/LN10)*log(max(EPS,gain_tgt)), -48, 48);
+draw_zero_marker(bar_x, bars_top+64, bar_w, bar_h, -48, 48); // если функция уже есть
+gfx_x=bar_x; gfx_y=bars_top+64+bar_h+4;
+sprintf(#t, "Applied: %.2f dB", (20/LN10)*log(max(EPS,gain_tgt))); gfx_drawstr(#t);
+
+

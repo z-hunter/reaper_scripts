@@ -1,0 +1,65 @@
+desc: Compensator - Sender (pre-FX meter only) [v1.0]
+author:Michael Voitovich
+version:1.0
+chans:2
+options:gmem=LevelLink
+
+slider1:0<0,63,1>Link ID
+slider2:400<5,3000,1>Detector window / Peak release (ms)
+slider3:0<0,1,1{RMS,Peak}>Mode
+slider4:-80<-120,-20,1>Silence threshold (dBFS)
+
+@init
+EPS  = 0.00000000000000000001;
+LN10 = log(10);
+LOG20 = 20 / LN10;
+
+function db_from_amp(a) ( a <= EPS ? -200 : LOG20*log(a); );
+
+// ID → база gmem
+function update_base() ( gmem_base = Link_ID*16; );
+// Коэффы для RMS и Peak release
+function set_coeffs() (
+  t = max(0.001, slider2/1000);
+  a_rms = exp(-1/(t*srate)); // для RMS эксп. окна
+  a_pk  = exp(-1/(t*srate)); // для Peak релиза (мгн. атака)
+);
+
+Link_ID = slider1; update_base(); set_coeffs();
+mode = slider3; sil_db = slider4;
+
+peak_env = 0; ms_acc = 0;
+
+@slider
+Link_ID = slider1; update_base(); set_coeffs();
+mode = slider3; sil_db = slider4;
+
+@block
+// публикуем режим (0=RMS, 1=Peak)
+gmem[gmem_base+2] = mode;
+
+@sample
+splL = spl0; splR = spl1;
+
+mode == 1 ? (
+  // --- Peak: мгновенная атака, экспоненциальный релиз ---
+  pk = max(abs(splL), abs(splR));
+  peak_env = max(pk, peak_env * a_pk);
+  level_amp = peak_env;
+) : (
+  // --- RMS: экспоненциальное окно ---
+  ms_acc = a_rms*ms_acc + (1-a_rms)*0.5*(splL*splL + splR*splR);
+  level_amp = sqrt(max(0, ms_acc));
+);
+
+level_db = db_from_amp(level_amp);
+is_silence = (level_db <= sil_db);
+
+// publish level & silence & mode
+gmem[gmem_base+0] = level_db;
+gmem[gmem_base+1] = is_silence ? 1 : 0;
+// gmem[gmem_base+2] уже пишем в @block
+
+// passthrough
+spl0 = splL; spl1 = splR;
+
