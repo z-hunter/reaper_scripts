@@ -1,6 +1,6 @@
 # My scripts and effects plugins for Cockos REAPER DAW
 
-## Extract Chords from Selected Audio Item (Chordino)
+## -> Extract Chords from Selected Audio Item (Chordino)
 
 *ExtractChordsFromAudio.lua*
 
@@ -62,7 +62,7 @@ The script requires your project to be saved on disk before it can run (it needs
     
     The script does not alter your original audio.
 
-## Compensator
+## -> Compensator
 
 A universal JSFX gain compensator for Reaper. One plugin (sender) is placed before the VST chain and measures the input volume. The second (receiver) is placed at the output and attempts to return the volume to the level of the first.
 The sender and receiver can be on different tracks, so the volume of one instrument can be adjusted based on the volume of the other.
