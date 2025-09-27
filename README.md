@@ -68,7 +68,7 @@ A universal JSFX gain compensator for Reaper. One plugin (sender) is placed befo
 The sender and receiver can be on different tracks, so the volume of one instrument can be adjusted based on the volume of the other.
 
 
-## Installation & Setup
+### Installation & Setup
 Put following files
 - Compensator - Sender.jsfx
 - Compensator - Receiver.jsfx
