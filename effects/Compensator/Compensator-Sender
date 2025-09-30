@@ -1,14 +1,12 @@
-/* 
-@description LevelLink – Receiver (reference matching + LUFS/RMS/Peak, A/R, RTZ)
+@description Compensator – sender
 @version 1.0.0
-@author Michael Voitovich
+@author Michael Voitovich (zx.hunter@gmail.com)
 @changelog
   - Initial public release
 @about
   LevelLink keeps post-FX level equal to the pre-FX reference (from Sender).
   Modes: RMS, Peak, LUFS-M (400ms), LUFS-S (3s). A/B via Reference monitoring.
-*/
-desc:Compensator - Sender (to sidechain)
+desc:Compensator - sender (to sidechain)
 author:zx.Hunter@gmail.com & Reaper DAW Ultimate Assistant
 chans:16
 

@@ -1,5 +1,4 @@
-*/
-//@description Compensator – Receiver
+//@description Compensator – receiver
 //@version 1.0.0
 //@author Michael Voitovich (zx.hunter@gmail.com)
 //@changelog
@@ -9,8 +8,7 @@
   Modes: RMS, Peak, LUFS-M (400ms), LUFS-S (3s). A/B via Reference monitoring.
 //@link https://github.com/z-hunter/reaper_scripts
 //@donation IBAN: BE80967651977277
-*/
-desc:Compensator - Receiver (gain match)
+desc:Compensator - receiver (gain match)
 author:zx.Hunter@gmail.com & Reaper DAW Ultimate Assistant
 chans:16
 
@@ -442,7 +440,7 @@ b = (col==3)?0.25: (col==2)?0.30: (col==1)?0.78: 0.90;
 
 draw_bar(bx,top+64, bw,bh, applied_db, -48, 48, r,g,b);
 draw_zero(bx,top+64,bw,bh,-48,48);
-gfx_r=gfx_g=gfx_b=0; gfx_x=bx; gfx_y=top+64+bh+4; sprintf(#t,"Applied: %.2f dB", applied_db); gfx_drawstr(#t);
+gfx_r=gfx_g=gfx_b=0; gfx_x=bx; gfx_y=top+64+bh+4; sprintf(#t,"Applied gain: %.2f dB", applied_db); gfx_drawstr(#t);
 
 last_app_db = applied_db;
 
