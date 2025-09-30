@@ -1,6 +1,6 @@
 --[[
   * ReaScript Name: Extract Chords from Selected Audio Item (Chordino)
-  * Author: Michael Voitovich (zx.hunter@gmail.com)
+  * Author: z-Hunter (zx.hunter@gmail.com)
   * Version: 1.0.1
   * Licence: MIT
   * REAPER: 6.0+
