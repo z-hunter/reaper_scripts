@@ -1,0 +1,13 @@
+name: ReaPack index
+on:
+  push: { branches: [ main ], tags: [ 'v*' ] }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cfillion/reapack-index@v1
+        with:
+          generate: true
+          commit: true
+          push: true
