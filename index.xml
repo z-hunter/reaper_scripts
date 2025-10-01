@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<index version="1" name="z-Hunter's ReaPack Repository">
+  <category name="Utility">
+    <reapack name="Compensator.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/z-hunter/reaper_scripts/raw/refs/heads/master/effects/Compensator/Compensator-Receiver</source>
+	<source>https://github.com/z-hunter/reaper_scripts/raw/refs/heads/master/effects/Compensator/Compensator-Sender</source>
+      </version>
+    </reapack>
+  </category>
+</index>
