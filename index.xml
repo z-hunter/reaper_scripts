@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <index version="1" name="z-Hunter's ReaPack Repository">
   <category name="Utility">
-    <reapack name="Compensator.jsfx" type="effect">
-      <version name="1.0.0">
+    <reapack name="Compensator" type="effect" desc="Automatic Gain Compensator">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 <i><Compensator-Receiver.jsfx/i> receives a reference signal on the sidechain (e.g., channels 2/3) and dynamically adjusts the levels of the input signal (on channels 1/2) to match the reference. Loudness detection by RMS and LUFS is supported. There's also a reference signal monitoring option for quick A/B comparisons.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 The auxiliary plugin <i><Compensator-Sender.jsfx/i>  allows you to quickly create a route to sidechain channels.\par}
+
+]]></description>
+      </metadata>
+      <version name="1.0" author="z-Hunter" >
         <source>https://github.com/z-hunter/reaper_scripts/raw/refs/heads/master/effects/Compensator/Compensator-Receiver</source>
-	<source>https://github.com/z-hunter/reaper_scripts/raw/refs/heads/master/effects/Compensator/Compensator-Sender</source>
+        <source>https://github.com/z-hunter/reaper_scripts/raw/refs/heads/master/effects/Compensator/Compensator-Sender</source>
       </version>
     </reapack>
   </category>
