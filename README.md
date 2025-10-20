@@ -67,6 +67,12 @@ The script requires your project to be saved on disk before it can run (it needs
 A universal JSFX gain compensator for Reaper. One plugin (sender) is placed before the VST chain and measures the input volume. The second (receiver) is placed at the output and attempts to return the volume to the level of the first.
 The sender and receiver can be on different tracks, so the volume of one instrument can be adjusted based on the volume of the other.
 
+*Compensator-Receiver.jsfx* receives a reference signal on the sidechain (e.g., channels 2/3) and dynamically adjusts the levels of the input signal (1/2) to match the reference.
+Loudness detection by RMS, Peaks, LUFS-M, LUFS-S is supported. There are numerous tuning parameters that allow you to tailor the Compensator's behavior to different material. All controls are provided with tooltips that appear at the bottom of the window when you touch the corresponding slider/switch. 
+There's also a reference signal monitoring option for quick A/B comparisons (e.g., signal before a VST chain VS processed and gain matched signal).
+You can use several Compensators in sequence, for example, using the "main" LUFS-M first, followed by the "fast and rough" RMS with a short detector window and a high activation threshold (Return-to-Zero parameter), so that it only suppresses sudden volume changes to which the first Compensator doesn't have time to react quickly.
+The auxiliary *Compensator-Sender.jsfx*  allows you to quickly create a route to sidechain channels. Put Sender before your VST chain, Receiver after it, and set the same “Reference channels”.
+
 
 ### Installation & Setup
 Put following files
